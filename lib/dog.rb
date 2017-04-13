@@ -2,7 +2,6 @@ require 'pry'
 
 class Dog
     attr_accessor :name, :breed, :id
-    # attr_reader :id
 
     def initialize(id: nil, name:, breed:)
         @id = id
@@ -57,7 +56,6 @@ class Dog
         LIMIT 1
         SQL
         dog = DB[:conn].execute(sql, name).first
-            # binding.pry
             self.new_from_db(dog)
     end
 
@@ -70,6 +68,17 @@ class Dog
         dog = DB[:conn].execute(sql, id).first
             # binding.pry
             self.new_from_db(dog)
+    end
+
+    def self.find_or_create_by(name:, breed:)
+      dog = DB[:conn].execute("SELECT * FROM dogs WHERE name = ? AND breed = ?", name, breed)
+      if !dog.empty?
+        dog_data = dog[0]
+        dog = Dog.new_from_db(dog[0])
+      else
+        dog = self.create(name: name, breed: breed)
+      end
+      dog
     end
 
 end
